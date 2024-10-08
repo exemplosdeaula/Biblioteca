@@ -1,0 +1,59 @@
+name: CI/CD Pipeline for Java Projec
+
+# Define os eventos que acionam a esteira. 
+# Aqui ela será executada em cada push ou pull request para a branch 'main'.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    # Define o ambiente onde o pipeline/esteira será executado 
+    # (neste caso, um contêiner com Ubuntu).
+    runs-on: ubuntu-latest
+
+    steps:
+      # Faz o checkout do código do repositório.
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Configura o ambiente com JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+
+      # Instala as dependências e compila o projeto Java usando Maven.
+      - name: Build with Maven
+        run: mvn clean install
+
+      # Executa os testes automatizados do projeto (usando Maven).
+      - name: Run tests
+        run: mvn test
+
+  deploy:
+    # Define que o job de deploy só será executado se o job de build for bem-sucedido.
+    # se o CI estiver ok, procede para o CD
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      # Faz novamente o checkout do repositório.
+      - name: Checkout repository for deploy
+        uses: actions/checkout@v3
+
+      # Configura o ambiente com o JDK.
+      - name: Set up JDK for deploy
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+
+      # Simulação de Deploy através do echo
+      - name: Simulated deploy
+        run: echo "Deploy to production would happen here"
